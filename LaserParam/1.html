@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Laser Parameter</title>
+    <script>
+        var Scale = 10000;
+        var SpotSize = 0.0030;//mm 
+        var Co = 25;
+        var laserpower;
+        var lasertrans;
+        var qrate;
+        var trimspeedObj;
+        var trimspeed;
+        var bitesizeObj;
+        var bitesize;
+        var overlap;
+
+        function Draw(spotsize) {
+            var canvas = document.getElementById("myCanvas");
+            var ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            spotsize *= Scale;
+            var BITESIZE = bitesize * Scale;
+            for (var k = 0; k < 16; ++k) {
+                var x = Co + k * BITESIZE; if (x > canvas.width - spotsize) { break; }
+                ctx.beginPath();
+                ctx.arc(x, 25, spotsize / 2, 0, 2 * Math.PI);
+                ctx.globalAlpha = 0.2;
+                ctx.fillStyle = 'blue';
+                ctx.fill();
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = '#003300';
+                ctx.stroke();
+            }
+        }
+        function Update() {
+            laserpower = document.getElementById("laserpower").value;
+            lasertrans = document.getElementById("lasertrans").value;
+            qrate = document.getElementById("qrate").value;
+            trimspeedObj = document.getElementById("trimspeed");
+            trimspeed = trimspeedObj.value;
+            bitesizeObj = document.getElementById("bitesize");
+            bitesize = bitesizeObj.value;
+            fradio();
+            overlap = (SpotSize - bitesize) / SpotSize;
+            document.getElementById("overlap").value = overlap;
+            energy_per_pulse = laserpower / qrate;
+            document.getElementById("energy_per_pulse").value = energy_per_pulse;
+            Draw(SpotSize);
+        }
+
+
+        function fradio() {
+            var radio_speed = document.getElementById("radio_speed").checked;
+            bitesizeObj.disabled = radio_speed;
+            trimspeedObj.disabled = !radio_speed;
+            if (radio_speed) {
+                bitesize = trimspeedObj.value / qrate / 1000.0;
+                bitesizeObj.value = bitesize;
+            }
+            else {
+                trimspeed = bitesizeObj.value * qrate * 1000.0;
+                trimspeedObj.value = trimspeed;
+            }
+        }
+
+    </script>
+</head>
+
+<body>
+    <table>
+        <tr>
+            <td></td>
+            <td>Laser Power (mW):</td>
+            <td><input type="number" id="laserpower" onchange="Update();" value="4000" /></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>Laser Transmission (%):</td>
+            <td><input type="number" id="lasertrans" onchange="Update();" value="100" /></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>Q-Rate (KHz):</td>
+            <td><input type="number" id="qrate" onchange="Update();" value="0.8" /></td>
+        </tr>
+        <tr>
+            <td><input type="radio" name="bite_speed" id="radio_speed" onclick="fradio();" checked></td>
+            <td>Trim Speed (m/sec):</td>
+            <td><input type="number" id="trimspeed" onchange="Update();" value="2.0" /></td>
+        </tr>
+        <tr>
+            <td><input type="radio" name="bite_speed" id="radio_bite" onclick="fradio();"></td>
+            <td>Bitesize (mm):</td>
+            <td><input type="number" id="bitesize" onchange="Update();" value="2.0" /></td>
+        </tr>
+
+        <tr>
+            <td></td>
+            <td>Overlap: </td>
+            <td><input type="number" id="overlap" value="" disabled /></td>
+
+        </tr>
+        <tr>
+            <td></td>
+            <td>Energy per Pulse (mJ): </td>
+            <td><input type="number" id="energy_per_pulse" value="" disabled /></td>
+
+        </tr>
+
+    </table>
+    <canvas id="myCanvas" width="200" height="50" style="border:1px solid #d3d3d3;"> Your browser does not support the
+        HTML5 canvas tag.</canvas>
+
+
+
+    <script>
+        Update();
+    </script>
+
+</body>
+
+</html>
